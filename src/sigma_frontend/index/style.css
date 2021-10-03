@@ -1,0 +1,47 @@
+.hat {
+    background-color: black;
+    color: white;
+    border: 1px solid black;
+    margin: 0px -15px 0;
+    padding: 5px 49% 0;
+    font-size: 22px;
+    width: 100%;
+}
+
+/* .promote-container {
+    margin: 16px 0;
+}
+
+div.promote1 {
+    position: relative;
+    width: 48%;
+    top: 15%;
+    background-color: #2d324d;
+    color: white;
+    height: 250px;
+    padding: 5px 25px;
+    font-size: 18px;
+}
+
+div.promote2 {
+    position: relative;
+    width: 48%;
+    left: 52%;
+    top: 15%;
+    height: 250px;
+    background-color: #344b29;
+    color: white;
+} */
+
+div#navmenu {
+    background-color: black;
+    color: white;
+}
+
+div.content {
+
+}
+
+.clearBoth {
+    clear: both;
+}
