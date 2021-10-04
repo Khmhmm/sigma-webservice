@@ -30,7 +30,7 @@ usButton.onclick = () => {
     contentHeader.innerText = aboutUsHeader
     contentText.innerText = aboutUsText
     contentButton.innerText = aboutUsButtonT
-    contentButton.href = "/login"
+    contentButton.href = "/catalogue"
 }
 
 authorsButton.onclick = () => {

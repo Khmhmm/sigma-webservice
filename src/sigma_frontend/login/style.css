@@ -2,8 +2,49 @@
     background-color: black;
     color: white;
     border: 1px solid black;
-    margin: 0px -15px 0;
     padding: 5px 49% 0;
     font-size: 22px;
-    width: 100%;
+    position: fixed;
+    top: 0;
+    left: -1%;
+}
+
+body {
+    background-color: #1A1919;
+}
+
+div.input-group {
+    margin: 1% 40%;
+}
+
+div.void {
+    margin: 20% 0;
+}
+
+input {
+    width: 30em;
+    padding: 0.5em;
+}
+
+button {
+    padding: 0.4em 1.2em;
+}
+
+button#login {
+    position: relative;
+    left: 40%;
+    width: 13.04em;
+    right: 0;
+    background-color: #5EADD9;
+    border: 1px solid #5EADD9;
+    color: white;
+}
+
+button#signup {
+    position: relative;
+    width: 13.04em;
+    left: 42.5%;
+    background-color: #43B45B;
+    border: 1px solid #43B45B;
+    color: white;
 }
