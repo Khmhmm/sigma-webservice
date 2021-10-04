@@ -30,7 +30,7 @@ button {
     padding: 0.4em 1.2em;
 }
 
-button#login {
+button.b1 {
     position: relative;
     left: 40%;
     width: 13.04em;
@@ -40,11 +40,17 @@ button#login {
     color: white;
 }
 
-button#signup {
+button.b2 {
     position: relative;
     width: 13.04em;
     left: 42.5%;
     background-color: #43B45B;
     border: 1px solid #43B45B;
     color: white;
+}
+
+button:disabled,
+button[disabled]{
+    background-color: #AAA;
+    border: 1px solid #AAA;
 }

@@ -10,11 +10,17 @@ xhttp.onreadystatechange = function() {
        // Typical action to be performed when the document is ready:
        // document.getElementById("demo").innerHTML = xhttp.responseText;
        // document.cookie = "user="+user+";pass="+pass+";SameSite=Lax;Secure";
-       alert(xhttp.responseText)
-    }
+       document.cookie = "hash="+xhttp.responseText+";SameSite=Lax;Secure";
+       window.location = '/cabinet';
+   } else {
+       signupButton.disabled = false;
+       loginButton.disabled = false;
+   }
 };
 
 function sendXhr(xhr) {
+    signupButton.disabled = true;
+    loginButton.disabled = true;
     xhttp.setRequestHeader('Content-Type', 'application/json');
     user = document.getElementById('user').value;
     pass = document.getElementById('pass').value;

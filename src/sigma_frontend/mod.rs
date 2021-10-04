@@ -51,9 +51,9 @@ impl ReadFrontend {
     fn read_dir(dir: &'static str) -> Result<FrontendBytes, std::io::Error> {
         println!("Reading dir: {}", dir);
 
-        let html = Self::read(Path::new("src").join("sigma_frontend").join(dir).join("index.html")).expect("Unable to read index/index.html");
-        let css = Self::read(Path::new("src").join("sigma_frontend").join(dir).join("style.css"));
-        let js = Self::read(Path::new("src").join("sigma_frontend").join(dir).join("script.js"));
+        let html = Self::read(Path::new("res").join("sigma_frontend").join(dir).join("index.html")).expect("Unable to read index/index.html");
+        let css = Self::read(Path::new("res").join("sigma_frontend").join(dir).join("style.css"));
+        let js = Self::read(Path::new("res").join("sigma_frontend").join(dir).join("script.js"));
 
         println!("\tHtml: Ok,  css: {}, js:{}\n", css.is_ok(), js.is_ok());
 
@@ -69,7 +69,7 @@ impl ReadFrontend {
         FrontendData {
             index: Some(Self::read_dir("index").expect("Unable to create data! Index directory was not read.")),
             // catalogue: Self::read_dir("catalogue"),
-            // cabinet: Self::read_dir("cabinet"),
+            cabinet: Some(Self::read_dir("cabinet").expect("Unable to create data! Cabinet directory was not read")),
             login: Some(Self::read_dir("login").expect("Unable to create data! Login directory was not read.")),
             .. Default::default()
         }
