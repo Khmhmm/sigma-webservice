@@ -34,7 +34,7 @@ impl FrontendData {
 }
 
 pub struct FrontendBytes {
-    pub html: Bytes,
+    pub html: Option<Bytes>,
     pub css: Option<Bytes>,
     pub js: Option<Bytes>
 }
@@ -51,14 +51,14 @@ impl ReadFrontend {
     fn read_dir(dir: &'static str) -> Result<FrontendBytes, std::io::Error> {
         println!("Reading dir: {}", dir);
 
-        let html = Self::read(Path::new("res").join("sigma_frontend").join(dir).join("index.html")).expect("Unable to read index/index.html");
+        let html = Self::read(Path::new("res").join("sigma_frontend").join(dir).join("index.html"));
         let css = Self::read(Path::new("res").join("sigma_frontend").join(dir).join("style.css"));
         let js = Self::read(Path::new("res").join("sigma_frontend").join(dir).join("script.js"));
 
         println!("\tHtml: Ok,  css: {}, js:{}\n", css.is_ok(), js.is_ok());
 
         Ok(FrontendBytes {
-            html: html,
+            html: if let Ok(c) = html { Some(c) } else { None },
             css: if let Ok(c) = css { Some(c) } else { None },
             js: if let Ok(c) = js { Some(c) } else { None }
         })

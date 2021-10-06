@@ -43,7 +43,7 @@ button.b1 {
 button.b2 {
     position: relative;
     width: 13.04em;
-    left: 42.5%;
+    right: -43.5%;
     background-color: #43B45B;
     border: 1px solid #43B45B;
     color: white;

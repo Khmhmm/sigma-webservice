@@ -2,12 +2,40 @@
 <html>
     <head>
         <title> Login </title>
+        <!-- <link rel="stylesheet" href="/cabinet/style.css"> -->
         <link rel="stylesheet" href="/cabinet/style.css">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
         <meta charset="utf-8" />
     </head>
     <body>
         <div class="hat">
             <p> Σигма </p>
         </div>
+
+        <div class="menu">
+            <button type="button" class="menuButton" id="addMenuButton">Новый заказ</button>
+            <button type="button" class="menuButton" id="listMenuButton">Активные заказы</button>
+            <button type="button" class="menuButton" id="handleMenuButton">Управление</button>
+        </div>
+
+        <div class="undermenu" id="undermenu">
+                <!-- Не забыть вынести в js!! -->
+                <button type="button" class="menuButton" id="addButton">Добавить</button>
+                <button type="button" class="menuButton" id="viewButton">Просмотр</button>
+                <button type="button" class="menuButton" id="editButton">Изменить</button>
+                <button type="button" class="menuButton" id="accountButton">Аккаунт</button>
+        </div>
+
+        <ul class="ordersList" id="activeOrders">
+            <li class="activeOrder" id="loadingStatus"> Загрузка списка заказов... </li>
+        </ul>
+
+        <div id="fillForm">
+        </div>
+
+        <div class="push">Готово</div>
+
+
+        <script src="/cabinet/script.js"></script>
     </body>
 </html>
