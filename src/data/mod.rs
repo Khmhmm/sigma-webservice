@@ -1,7 +1,9 @@
+pub mod model;
+
+
 use postgres::{Client, error::Error as PgError, row::Row, types::ToSql};
 use super::config::Config;
 use std::sync::Mutex;
-
 pub trait DBConnection: Send + Sync {
     // TODO: use simple envelop in the interface instead of postgres::row::Row and dyn ToSql
     fn query_get_each(&self, query: &str, params: &[&(dyn ToSql + Sync)]) -> Result<Vec<Row>, DbError>;
