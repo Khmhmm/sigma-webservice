@@ -1,5 +1,3 @@
-#[macro_use]
-
 use actix_web::{web, HttpResponse, Responder};
 use std::collections::HashMap;
 use crate::DB_CONNECTION;

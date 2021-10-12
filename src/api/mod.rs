@@ -1,14 +1,11 @@
-#[macro_use]
-
 use actix_web::{get, post, web, HttpResponse, HttpRequest, Responder};
 
 use crate::data::DBConnection;
 
 use crate::{
-    {GLOBAL_FRONTEND, DB_CONNECTION, CFG},
+    {DB_CONNECTION},
     data::model::{Typography, Order},
-    get_content, check_cookie, construct_query_nameonly,
-    append_json
+    check_cookie, construct_query_nameonly
 };
 
 use serde_json;
@@ -147,7 +144,7 @@ pub async fn get_ordermakers(req: HttpRequest)-> impl Responder {
 
 pub mod index {
     use actix_web::{get, HttpResponse, Responder};
-    
+
     use std::ops::Deref;
     use crate::{GLOBAL_FRONTEND, get_content};
 
@@ -169,8 +166,8 @@ pub mod index {
 
 
 pub mod login_page {
-    use actix_web::{get, post, web, HttpResponse, HttpRequest, Responder};
-    
+    use actix_web::{get, HttpResponse, Responder};
+
     use std::ops::Deref;
     use crate::{GLOBAL_FRONTEND, get_content};
     use serde::{Serialize, Deserialize};
@@ -199,15 +196,15 @@ pub mod login_page {
 
 pub mod cabinet {
     use actix_web::{get, HttpResponse, HttpRequest, Responder};
-    
+
     use std::ops::Deref;
     use crate::{
         {GLOBAL_FRONTEND, DB_CONNECTION, data::DBConnection},
         get_content, check_cookie
     };
-    
-    
-    
+
+
+
 
     #[get("/cabinet")]
     pub async fn get_cabinet_index(req: HttpRequest) -> impl Responder {

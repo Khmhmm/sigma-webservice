@@ -6,7 +6,7 @@ use std::path::Path;
 #[derive(Default)]
 pub struct FrontendData {
     index: Option<FrontendBytes>,
-    catalogue: Option<FrontendBytes>,
+    // catalogue: Option<FrontendBytes>,
     cabinet: Option<FrontendBytes>,
     login: Option<FrontendBytes>
 }
@@ -17,10 +17,10 @@ impl FrontendData {
         self.index.as_ref()
     }
 
-    #[inline]
-    pub fn get_catalogue(&self) -> Option<&FrontendBytes> {
-        self.catalogue.as_ref()
-    }
+    // #[inline]
+    // pub fn get_catalogue(&self) -> Option<&FrontendBytes> {
+    //     self.catalogue.as_ref()
+    // }
 
     #[inline]
     pub fn get_cabinet(&self) -> Option<&FrontendBytes> {

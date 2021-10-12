@@ -17,6 +17,12 @@ pub enum DbError {
     Unknown
 }
 
+impl std::default::Default for DbError {
+    fn default() -> DbError {
+        DbError::Unknown
+    }
+}
+
 pub struct PostgresEnvelop {
     connection: Mutex<Client>
 }
