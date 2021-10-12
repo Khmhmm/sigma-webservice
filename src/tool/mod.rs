@@ -1,6 +1,6 @@
 #[macro_use]
 
-use actix_web::{get, post, web, HttpResponse, Responder};
+use actix_web::{web, HttpResponse, Responder};
 use std::collections::HashMap;
 use crate::DB_CONNECTION;
 use crate::data::DBConnection;

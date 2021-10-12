@@ -1,16 +1,16 @@
 #[macro_use]
 
-use actix_web::{get, post, web, HttpResponse, HttpRequest, FromRequest, Responder};
-use crate::sigma_frontend::FrontendData;
+use actix_web::{get, post, web, HttpResponse, HttpRequest, Responder};
+
 use crate::data::DBConnection;
-use std::ops::Deref;
+
 use crate::{
     {GLOBAL_FRONTEND, DB_CONNECTION, CFG},
     data::model::{Typography, Order},
     get_content, check_cookie, construct_query_nameonly,
     append_json
 };
-use serde::{Serialize, Deserialize};
+
 use serde_json;
 use scrypt::{
     password_hash::{ rand_core::OsRng, PasswordHash, PasswordHasher, PasswordVerifier, SaltString, Encoding },
@@ -65,7 +65,7 @@ pub async fn signup(req: web::Json<self::login_page::Credentials>) -> impl Respo
     let salt = SaltString::generate(&mut OsRng);
     let password_hash = Scrypt.hash_password(user_pass.as_bytes(), &salt).unwrap().to_string();
 
-    let result_id = DB_CONNECTION.query_edit(
+    let _result_id = DB_CONNECTION.query_edit(
         &format!(r##"CALL public."insertUser"('{}','{}','{}');"##,req.u,password_hash,salt.as_str()), &[]
     ).unwrap();
 
@@ -105,7 +105,7 @@ pub async fn have_rights(req: HttpRequest) -> impl Responder {
 
 // #[post("/api/newTypography")]
 pub async fn new_typography(req: web::Json<Typography>) -> impl Responder {
-    let result_id = DB_CONNECTION.query_edit(
+    let _result_id = DB_CONNECTION.query_edit(
         &format!(r##"CALL public."insertTypography"('{}','{}','{}');"##,req.name,req.address,req.phone), &[]
     ).unwrap();
     return HttpResponse::Ok().finish();
@@ -113,7 +113,7 @@ pub async fn new_typography(req: web::Json<Typography>) -> impl Responder {
 
 // #[post("/api/newOrder]
 pub async fn new_order(req: web::Json<Order>) -> impl Responder {
-    let result_id = DB_CONNECTION.query_edit(
+    let _result_id = DB_CONNECTION.query_edit(
         &format!(r##"CALL public."insertOrder"('{}','{}','{}','{}','{}','{}','{}','{}');"##,req.author_id,req.name,req.category_id,req.year,req.type_id,req.typography_id,req.ordermaker_id,req.price), &[]
     ).unwrap();
     return HttpResponse::Ok().finish();
@@ -146,8 +146,8 @@ pub async fn get_ordermakers(req: HttpRequest)-> impl Responder {
 
 
 pub mod index {
-    use actix_web::{get, post, web, HttpResponse, Responder};
-    use crate::sigma_frontend::{ReadFrontend, FrontendData};
+    use actix_web::{get, HttpResponse, Responder};
+    
     use std::ops::Deref;
     use crate::{GLOBAL_FRONTEND, get_content};
 
@@ -170,9 +170,9 @@ pub mod index {
 
 pub mod login_page {
     use actix_web::{get, post, web, HttpResponse, HttpRequest, Responder};
-    use crate::sigma_frontend::FrontendData;
+    
     use std::ops::Deref;
-    use crate::{GLOBAL_FRONTEND, DB_CONNECTION, data::DBConnection, CFG, get_content};
+    use crate::{GLOBAL_FRONTEND, get_content};
     use serde::{Serialize, Deserialize};
 
     #[derive(Debug, Serialize, Deserialize)]
@@ -198,19 +198,16 @@ pub mod login_page {
 }
 
 pub mod cabinet {
-    use actix_web::{get, post, web, HttpResponse, HttpRequest, Responder};
-    use crate::sigma_frontend::FrontendData;
+    use actix_web::{get, HttpResponse, HttpRequest, Responder};
+    
     use std::ops::Deref;
     use crate::{
-        {GLOBAL_FRONTEND, DB_CONNECTION, data::DBConnection, CFG},
+        {GLOBAL_FRONTEND, DB_CONNECTION, data::DBConnection},
         get_content, check_cookie
     };
-    use crate::api::login_page::Credentials;
-    use serde::{Serialize, Deserialize};
-    use scrypt::{
-        password_hash::{ rand_core::OsRng, PasswordHash, PasswordHasher, PasswordVerifier, SaltString, Encoding },
-        Scrypt
-    };
+    
+    
+    
 
     #[get("/cabinet")]
     pub async fn get_cabinet_index(req: HttpRequest) -> impl Responder {

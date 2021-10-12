@@ -15,7 +15,7 @@ use data::{DBConnection, PostgresEnvelop};
 use sigma_frontend::{FrontendData, ReadFrontend};
 use lazy_static::lazy_static;
 use openssl::ssl::*;
-use std::collections::HashMap;
+
 
 lazy_static! {
     static ref GLOBAL_FRONTEND: FrontendData = ReadFrontend::create_data();
