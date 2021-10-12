@@ -102,3 +102,7 @@ button[disabled] {
     padding: 10px 10px 25px 10px;
     color: white;
 }
+
+.hide {
+    display: none;
+}

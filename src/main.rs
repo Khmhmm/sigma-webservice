@@ -24,7 +24,7 @@ lazy_static! {
 
 #[macro_export]
 macro_rules! check_cookie{
-    {$req: ident, $if_valid: block} => {
+    {$req: ident, $if_valid: block} => {{
         let cookie = $req.headers().get("Cookie");
 
         if let Some(cookie) = cookie.as_ref().and_then(|cookie| cookie.to_str().map_or(None, |s| Some(s))) {
@@ -39,6 +39,35 @@ macro_rules! check_cookie{
         } else {
             return HttpResponse::Forbidden().finish();
         }
+    }};
+
+    ($req: ident) => {{
+        let cookie = $req.headers().get("Cookie");
+
+        if let Some(cookie) = cookie.as_ref().and_then(|cookie| cookie.to_str().map_or(None, |s| Some(s))) {
+            let hash = &cookie[cookie.find('=').unwrap()+1..];
+            let q = r##"SELECT public."validHash"('"##.to_owned() + hash + r##"');"##;
+            let is_valid: bool = DB_CONNECTION.query_get(&q, &[]).unwrap().get(0);
+            if is_valid {
+                true
+            } else {
+                false
+            }
+        } else {
+            false
+        }
+
+    }};
+}
+
+#[macro_export]
+macro_rules! construct_post_resource{
+    ($route: expr, $api: ident) => {
+        web::resource($route).route(
+                web::route().guard(actix_web::guard::fn_guard(|req| {
+                    req.method == actix_web::http::Method::POST && check_cookie!(req)
+                })).to($api)
+        )
     }
 }
 
@@ -53,7 +82,7 @@ macro_rules! get_content{
     }
 }
 
-pub fn construct_json(new_obj: &mut HashMap<String, String>, row: postgres::row::Row) {
+pub fn construct_json_order(new_obj: &mut HashMap<String, String>, row: postgres::row::Row) {
     append_json!(author, "author", row, 0, String, new_obj);
     append_json!(ord, "ord", row, 1, String, new_obj);
     append_json!(category, "category", row, 2, String, new_obj);
@@ -65,11 +94,34 @@ pub fn construct_json(new_obj: &mut HashMap<String, String>, row: postgres::row:
     append_json!(status, "status", row, 8, i16, new_obj);
 }
 
+pub fn construct_json_nameonly(new_obj: &mut HashMap<String, String>, row: postgres::row::Row) {
+    append_json!(id, "id", row, 0, i64, new_obj);
+    append_json!(name, "name", row, 1, String, new_obj);
+}
+
 #[macro_export]
 macro_rules! append_json{
     ($row_ident: ident, $obj_row: expr, $row: ident, $col_num: expr, $col_type: ty, $obj_name: ident) => {
         let $row_ident: $col_type = $row.get($col_num);
         $obj_name.insert($obj_row.to_string(), format!("{}", $row_ident));
+    }
+}
+
+pub fn construct_query_nameonly(req: web::HttpRequest, q: &str) -> impl Responder {
+    check_cookie!{ req,
+        {
+            let data = DB_CONNECTION.query_get_each(q, &[]).unwrap();
+            let mut output = Vec::<HashMap<String, String>>::new();
+
+            for row in data {
+                let mut new_obj = HashMap::new();
+                crate::construct_json_nameonly(&mut new_obj, row);
+                output.push(new_obj);
+            }
+
+            let json = serde_json::to_string(&output).unwrap();
+            return HttpResponse::Ok().body(&json);
+        }
     }
 }
 
@@ -85,6 +137,8 @@ async fn manual_hello() -> impl Responder {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    use api::{new_typography, new_order};
+
     // create it by openssl:
     // openssl req -x509 -newkey rsa:4096 -nodes -keyout key.pem -out cert.pem -days 365 -subj '/CN=localhost'
     // note: use doubleslash with -subj: '//CN=localhost'
@@ -102,8 +156,10 @@ async fn main() -> std::io::Result<()> {
             .service(login::get_login).service(login::get_login_style).service(login::get_login_script)
             .service(api::signup).service(api::login)
             .service(cabinet::get_cabinet_index).service(cabinet::get_cabinet_style).service(cabinet::get_cabinet_script)
-            .service(api::get_active_orders).service(api::have_rights).service(api::new_typography)
-            .route("/hey", web::get().to(manual_hello))
+            .service(api::get_active_orders).service(api::have_rights)
+            .service(construct_post_resource!("/api/newTypography", new_typography))
+            .service(construct_post_resource!("/api/newOrder", new_order))
+            .service(api::get_authors).service(api::get_categories).service(api::get_types).service(api::get_typographies).service(api::get_ordermakers)
     })
     .bind_openssl("127.0.0.1:8080", builder)?
     .run()
@@ -196,11 +252,23 @@ mod cabinet {
 mod model {
     use serde::{Serialize, Deserialize};
 
-    #[derive(Serialize, Deserialize)]
+    #[derive(Serialize, Deserialize, Debug)]
     pub struct Typography {
         pub name: String,
         pub address: String,
         pub phone: String
+    }
+
+    #[derive(Serialize, Deserialize, Debug)]
+    pub struct Order {
+        pub author_id: i32,
+        pub name: String,
+        pub category_id: i32,
+        pub year: i32,
+        pub type_id: i32,
+        pub typography_id: i32,
+        pub ordermaker_id: i32,
+        pub price: f32
     }
 }
 
@@ -210,8 +278,8 @@ mod api {
     use std::ops::Deref;
     use super::{
         {GLOBAL_FRONTEND, DB_CONNECTION, data::DBConnection, CFG},
-        model::{Typography},
-        get_content, check_cookie, login::Credentials
+        model::{Typography, Order},
+        get_content, check_cookie, login::Credentials, construct_query_nameonly
     };
     use serde::{Serialize, Deserialize};
     use serde_json;
@@ -284,7 +352,7 @@ mod api {
 
             for row in data {
                 let mut new_obj = HashMap::new();
-                super::construct_json(&mut new_obj, row);
+                super::construct_json_order(&mut new_obj, row);
                 output.push(new_obj);
             }
 
@@ -306,19 +374,44 @@ mod api {
         }
     }
 
-    #[post("/api/newTypography")]
-    pub async fn new_typography(req: HttpRequest) -> impl Responder {
-        check_cookie!{ req,
-            {
-                println!("{:?}", req);
-                let req = web::Json::<Typography>::extract(&req).await.unwrap();
-                // TODO: add check
-                let result_id = DB_CONNECTION.query_edit(
-                    &format!(r##"CALL public."insertTypography"('{}','{}','{}');"##,req.name,req.address,req.phone), &[]
-                ).unwrap();
-                println!("Inserted new typography: {}", req.name);
-                return HttpResponse::Ok().finish();
-            }
-        }
+    // #[post("/api/newTypography")]
+    pub async fn new_typography(req: web::Json<Typography>) -> impl Responder {
+        let result_id = DB_CONNECTION.query_edit(
+            &format!(r##"CALL public."insertTypography"('{}','{}','{}');"##,req.name,req.address,req.phone), &[]
+        ).unwrap();
+        return HttpResponse::Ok().finish();
+    }
+
+    // #[post("/api/newOrder]
+    pub async fn new_order(req: web::Json<Order>) -> impl Responder {
+        let result_id = DB_CONNECTION.query_edit(
+            &format!(r##"CALL public."insertOrder"('{}','{}','{}','{}','{}','{}','{}','{}');"##,req.author_id,req.name,req.category_id,req.year,req.type_id,req.typography_id,req.ordermaker_id,req.price), &[]
+        ).unwrap();
+        return HttpResponse::Ok().finish();
+    }
+
+    #[get("/api/getAuthors")]
+    pub async fn get_authors(req: HttpRequest) -> impl Responder {
+        construct_query_nameonly(req, r##"SELECT id, name from public."getTotalAuthors"();"##)
+    }
+
+    #[get("/api/getCategories")]
+    pub async fn get_categories(req: HttpRequest)-> impl Responder {
+        construct_query_nameonly(req, r##"SELECT id, name from public."getTotalCategories"();"##)
+    }
+
+    #[get("/api/getTypes")]
+    pub async fn get_types(req: HttpRequest)-> impl Responder {
+        construct_query_nameonly(req, r##"SELECTid,  name from public."getTotalTypes"();"##)
+    }
+
+    #[get("/api/getTypographies")]
+    pub async fn get_typographies(req: HttpRequest)-> impl Responder {
+        construct_query_nameonly(req, r##"SELECT id, name from public."getTotalTypographies"();"##)
+    }
+
+    #[get("/api/getOrdermakers")]
+    pub async fn get_ordermakers(req: HttpRequest)-> impl Responder {
+        construct_query_nameonly(req, r##"SELECT id, name from public."getTotalOrdermakers"();"##)
     }
 }
