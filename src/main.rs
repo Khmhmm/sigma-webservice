@@ -402,7 +402,7 @@ mod api {
 
     #[get("/api/getTypes")]
     pub async fn get_types(req: HttpRequest)-> impl Responder {
-        construct_query_nameonly(req, r##"SELECTid,  name from public."getTotalTypes"();"##)
+        construct_query_nameonly(req, r##"SELECT id,  name from public."getTotalTypes"();"##)
     }
 
     #[get("/api/getTypographies")]

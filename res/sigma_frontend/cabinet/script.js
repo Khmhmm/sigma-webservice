@@ -50,13 +50,6 @@ undermenu.style.display = "none";
 let pushDiv = document.querySelector(".push");
 pushDiv.style.display = "none";
 
-// storages for fetched data
-let authors = []
-let categories = []
-let types = []
-let typographies = []
-let ordermakers = []
-
 function pushNotification(text, color) {
     pushDiv.innerText = text;
     pushDiv.style.backgroundColor = color;
@@ -116,8 +109,10 @@ const new_typography_onclick = function() {
     xhr.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
             pushNotification("Запрос о добавлении типографии успешно отправлен", "green");
+        } else if (this.readyState != 4) {
+            pushNotification("Запрос обрабатывается", "yellow");
         } else {
-            pushNotification("Сервер не распознал ваш запрос", "red");
+            pushNotification("Произошла ошибка. Ответ сервера:" + this.status, "red");
         }
     }
     xhr.open("POST","/api/newTypography");
@@ -129,23 +124,26 @@ const new_order_onclick = function() {
     let xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
-            pushNotification("Запрос о создании заказа успешно отправлен", "green");
+            pushNotification("Запрос о добавлении типографии успешно отправлен", "green");
+        } else if (this.readyState != 4) {
+            pushNotification("Запрос обрабатывается", "yellow");
         } else {
-            pushNotification("Сервер не распознал ваш запрос", "red");
+            pushNotification("Произошла ошибка. Ответ сервера:" + this.status, "red");
         }
     }
 
     xhr.open("POST","/api/newOrder");
     xhr.setRequestHeader('Content-Type', 'application/json');
+
     xhr.send(JSON.stringify(
-        {'name':document.querySelector('form#orderForm > input.formName').value,
-        'author_id':document.querySelector('form#orderForm > input.formAuthor').value,
-        'category_id':document.querySelector('form#orderForm > input.formCategory').value,
-        'year':document.querySelector('form#orderForm > input.formYear').value,
-        'type_id':document.querySelector('form#orderForm > input.formType').value,
-        'typography_id':document.querySelector('form#orderForm > input.formTypography').value,
-        'ordermaker_id':document.querySelector('form#orderForm > input.formOrdermaker').value,
-        'price':document.querySelector('form#orderForm > input.formPrice').value}
+        {'name':document.querySelector('#orderForm > div > input.formName').value,
+        'author_id':Number(document.querySelector('#orderForm > div > p > input.formAuthor').value),
+        'category_id':Number(document.querySelector('#orderForm > div > p > input.formCategory').value),
+        'year':Number(document.querySelector('#orderForm > div > input.formYear').value),
+        'type_id':Number(document.querySelector('#orderForm > div > p > input.formType').value),
+        'typography_id':Number(document.querySelector('#orderForm > div > p > input.formTypography').value),
+        'ordermaker_id':Number(document.querySelector('#orderForm > div > p > input.formOrdermaker').value),
+        'price':Number(document.querySelector('#orderForm > div > input.formPrice').value)}
     ));
 }
 
@@ -184,85 +182,83 @@ xhr_have_rights.send();
 
 const haveRights = lockOnRights().then((res)=>res).catch((err)=>console.error(err));
 
-addMenuButton.onclick = function() {
-    if(haveRights) {
-        updateOrderForm();
-        form.style.display = "flow-root";
-        form = orderForm;
-        console.log(form);
-        console.log('and');
-        console.log(orderForm);
-        ordersList.style.display="none";
-        undermenu.style.display="none";
-    }
-}
-
 listMenuButton.onclick = () => {
+    if(form.childNodes.length > 0) {
+        form.removeChild(form.childNodes[0]);
+    }
     form.style.display = "none";
     ordersList.style.display="flow-root";
     undermenu.style.display="none";
 }
 
 handleMenuButton.onclick = () => {
+    if(form.childNodes.length > 0) {
+        form.removeChild(form.childNodes[0]);
+    }
     form.style.display="none";
     ordersList.style.display="none";
     undermenu.style.display="flow-root";
 }
 
-function getData(xhr, collection, route) {
+async function getData(xhr, route, colName, className) {
+    collection = [];
     xhr.onreadystatechange = async function() {
         if (this.readyState == 4 && this.status == 200) {
             collection = JSON.parse(this.responseText);
-            console.log(collection);
+            let new_div = document.createElement('div');
+            new_div.classList.add('formInput');
+            new_div.innerText = colName;
+            let new_p = document.createElement('p');
+            for (let i=0;i<collection.length;i++) {
+                el = collection[i];
+                new_p.innerHTML += `<input class="formInput `+className+`" name="`+className+`" type="radio" value="`+el['id']+`">`+ el['name'];
+            }
+            new_div.appendChild(new_p);
+            orderForm.appendChild(new_div);
         }
     }
     xhr.open("GET", route, true);
     xhr.send();
+    await xhr.onreadystatechange();
 }
+
+orderForm.innerHTML += `<div class="formHeader"> Новый заказ </div>`;
+orderForm.innerHTML += `<div> Название <input class="formInput formName"></input></div>`;
+orderForm.innerHTML += `<div> Год <input class="formInput formYear"></input></div>`;
+orderForm.innerHTML += `<div> Цена <input class="formInput formPrice"></input></div>`;
+
 
 let xhr_authors = new XMLHttpRequest();
-getData(xhr_authors, authors, "/api/getAuthors");
+getData(xhr_authors, "/api/getAuthors", "Автор", "formAuthor");
 
 let xhr_categories = new XMLHttpRequest();
-getData(xhr_categories, categories, "/api/getCategories");
+categories = getData(xhr_categories, "/api/getCategories", "Категория", "formCategory");
 
 let xhr_types = new XMLHttpRequest();
-getData(xhr_types, types, "/api/getTypes");
+getData(xhr_types, "/api/getTypes", "Тип издания", "formType");
 
 let xhr_typography = new XMLHttpRequest();
-getData(xhr_typography, typographies, "/api/getTypographies");
+getData(xhr_typography, "/api/getTypographies", "Типография", "formTypography");
 
 let xhr_ordermakers = new XMLHttpRequest();
-getData(xhr_ordermakers, ordermakers, "/api/getOrdermakers");
+getData(xhr_ordermakers, "/api/getOrdermakers", "Заказчик", "formOrdermaker");
 
 
-function updateTypoForm() {
-    typoForm.innerHTML = `<div class="formHeader"> Новая типография </div>
+typoForm.innerHTML = `<div class="formHeader"> Новая типография </div>
         <div> Название <input class="formInput" id="formName"></input></div>
         <div> Адрес    <input class="formInput" id="formAddress"></input></div>
-        <div> Телефон  <input class="formInput" id="formPhone" ></input></div>
-        <p> Если все верно </p>`;
-}
+        <div> Телефон  <input class="formInput" id="formPhone" ></input></div>`;
 
-function updateOrderForm() {
-    orderForm.innerHtml = `<div class="formHeader"> Новый заказ </div>
-        <div> Название <input class="formInput formName"></input></div>`;
-    for(const author in authors) {
-        console.log('iter over ' + author);
-        orderForm.innerHTML += `<div> Автор <input class="formInput formAuthor" type="radio">`+author['id']+`</input>`+author['name']+`</div> `;
+
+
+addMenuButton.onclick = async function() {
+    if(haveRights) {
+        if(form.childNodes.length > 0) {
+            form.removeChild(form.childNodes[0]);
+        }
+        form.style.display = "flow-root";
+        form.appendChild(orderForm);
+        ordersList.style.display="none";
+        undermenu.style.display="none";
     }
-    for(const category in categories) {
-        orderForm.innerHTML += `<div> Категория <input class="formInput formCategory" type="radio">`+category['id']+`</input>`+category['name']+`</div> `;
-    }
-    orderForm.innerHTML += `<div> Год <input class="formInput formYear"></input></div>`;
-    for(const ty in types) {
-        orderForm.innerHTML += `<div> Тип <input class="formInput formType" type="radio">`+ty['id']+`</input>`+ty['name']+`</div> `;
-    }
-    for(const typo in typographies) {
-        orderForm.innerHTML += `<div> Типография <input class="formInput formTypography" type="radio">`+typo['id']+`</input>`+typo['name']+`</div> `;
-    }
-    for(const ordermaker in ordermakers) {
-        orderForm.innerHTML += `<div> Заказчик <input class="formInput formOrdermaker" type="radio">`+ordermaker['id']+`</input>`+ordermaker['name']+`</div> `;
-    }
-    orderForm.innerHTML += `<div> Цена <input class="formInput" id="formPrice"></input></div>`;
 }
