@@ -18,3 +18,26 @@ pub struct Order {
     pub ordermaker_id: i32,
     pub price: f32
 }
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Author {
+    pub name: String,
+    pub birthday: String,
+    pub zodiac_id: String
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Ordermaker {
+    pub is_organization: bool,
+    pub contact_name: String,
+    pub address: String,
+    pub phone: String,
+    pub title: String
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Action{
+    pub id: i32,
+    pub action: String,
+    pub date: String
+}

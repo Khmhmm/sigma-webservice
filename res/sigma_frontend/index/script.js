@@ -1,4 +1,7 @@
-"use strict"
+let hat = document.querySelector('.hat');
+hat.onclick = function() {
+    window.location = "/";
+}
 
 let usButton = document.getElementById('us')
 let authorsButton = document.getElementById('authors')
@@ -14,13 +17,13 @@ let aboutUsHeader = 'О нас'
 let aboutUsText = 'Мы, издательство “Сигма”, больше всего ценим слово. Ранящее до глубины души и вызывающее самые разные эмоции - оно сопровождает нас всю жизнь. Каждый из нас мыслит, знакомится и признается в любви, радуется новому дню и маленьким победам с помощью слов. Главная цель “Сигмы” - сохранить слова для современников и будущих поколений, а также помочь молодым авторам донести свои мысли и переживания до вас, наших читателей. Спасибо, что вы с нами, и добро пожаловать.'
 let aboutUsButtonT = 'Отправиться в путешествие'
 
-let authorsHeader = 'Для авторов'
-let authorsText = 'С "Сигмой" сотрудничает уже более N авторов и организаций - присоединяйтесь к нам уже сейчас, в пару кликов.'
+let authorsHeader = 'Кабинет'
+let authorsText = 'С "Сигмой" сотрудничают как известные, так и начинающие авторы и организации - присоединяйтесь к нам уже сейчас, в пару кликов. Отслеживайте работу издательства в реальном времени уже сегодня - нет ничего проще.'
 let authorsButtonT = 'Войти в кабинет'
 
-let catalogueHeader = 'Каталог'
-let catalogueText = 'Встречайте наши подборки на любой вкус от Кафки до Пелевина, от менеджмента до эзотерики, от ненависти до любви - один клик.'
-let catalogueButtonT = 'В каталог'
+// let catalogueHeader = 'Каталог'
+// let catalogueText = 'Встречайте наши подборки на любой вкус от Кафки до Пелевина, от менеджмента до эзотерики, от ненависти до любви - один клик.'
+// let catalogueButtonT = 'Пока недоступно'
 
 let merchHeader = 'Мерч'
 let merchText = 'Встречайте нашу коллекцию при поддержке слышкупитолсовку.рф'
@@ -30,7 +33,7 @@ usButton.onclick = () => {
     contentHeader.innerText = aboutUsHeader
     contentText.innerText = aboutUsText
     contentButton.innerText = aboutUsButtonT
-    contentButton.href = "/catalogue"
+    contentButton.href = "/login"
 }
 
 authorsButton.onclick = () => {
@@ -40,12 +43,12 @@ authorsButton.onclick = () => {
     contentButton.href = "/login"
 }
 
-cataloguesButton.onclick = () => {
-    contentHeader.innerText = catalogueHeader
-    contentText.innerText = catalogueText
-    contentButton.innerText = catalogueButtonT
-    contentButton.href = "/catalogue"
-}
+// cataloguesButton.onclick = () => {
+//     contentHeader.innerText = catalogueHeader
+//     contentText.innerText = catalogueText
+//     contentButton.innerText = catalogueButtonT
+//     contentButton.href = "/"
+// }
 
 merchButton.onclick = () => {
     contentHeader.innerText = merchHeader

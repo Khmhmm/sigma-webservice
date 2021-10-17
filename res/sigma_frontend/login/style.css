@@ -7,6 +7,7 @@
     position: fixed;
     top: 0;
     left: -1%;
+    cursor: pointer;
 }
 
 body {
@@ -53,4 +54,12 @@ button:disabled,
 button[disabled]{
     background-color: #AAA;
     border: 1px solid #AAA;
+}
+
+.warn {
+    position: relative;
+    width: 13.04em;
+    right: -47.5%;
+    color: red;
+    font-family: "Raleway", regular;
 }

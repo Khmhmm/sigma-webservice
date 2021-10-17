@@ -8,6 +8,7 @@
     top: 0;
     left: -1%;
     z-index: 2;
+    cursor: pointer;
 }
 
 .norights {
@@ -102,8 +103,54 @@ button[disabled] {
     bottom: 50px;
     padding: 10px 10px 25px 10px;
     color: white;
+    border: 5px solid green;
+    border-radius: 5px;
 }
 
 .hide {
     display: none;
+}
+
+div.zodiac {
+    font-size: 16px;
+    font-family: "Raleway", italic;
+    color: gray;
+    margin: -5px 5px;
+}
+
+button.nav-add {
+    margin: 1% 15px 0 0;
+    background-color: #202455;
+    color: white;
+    border: 5px solid #202455;
+    border-radius: 5px;
+    font-size: 18px;
+    font-family: "Raleway", regular;
+}
+
+button.nav-add:hover {
+    background-color: #72D38C;
+    border: 5px solid #72D38C;
+}
+
+button:disabled,
+button[disabled]{
+    background-color: #AAA;
+    border: 5px solid #AAA;
+    color: black;
+}
+
+button:disabled:hover,
+button[disabled]:hover{
+    background-color: #AAA;
+    border: 5px solid #AAA;
+}
+
+.covered{
+    background-color: black;
+    color: black;
+}
+
+.covered:hover {
+    color: white;
 }

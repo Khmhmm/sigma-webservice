@@ -4,8 +4,8 @@ use crate::data::DBConnection;
 
 use crate::{
     {DB_CONNECTION},
-    data::model::{Typography, Order},
-    check_cookie, construct_query_nameonly
+    data::model::{Typography, Order, Author, Ordermaker},
+    check_cookie, construct_query_nameonly, check_cookie_rights
 };
 
 use serde_json;
@@ -84,7 +84,7 @@ pub async fn get_active_orders(req: HttpRequest) -> impl Responder {
 
         let json = serde_json::to_string(&output).unwrap();
         return HttpResponse::Ok().body(&json);
-    });
+    }, 8);
 }
 
 #[get("/api/haveRights")]
@@ -114,6 +114,48 @@ pub async fn new_order(req: web::Json<Order>) -> impl Responder {
         &format!(r##"CALL public."insertOrder"('{}','{}','{}','{}','{}','{}','{}','{}');"##,req.author_id,req.name,req.category_id,req.year,req.type_id,req.typography_id,req.ordermaker_id,req.price), &[]
     ).unwrap();
     return HttpResponse::Ok().finish();
+}
+
+// #[post("/api/newAuthor")]
+pub async fn new_author(req: web::Json<Author>) -> impl Responder {
+    let _result_id = DB_CONNECTION.query_edit(
+        &format!(r##"CALL public."insertAuthor"('{}','{}','{}');"##,req.name,req.birthday,req.zodiac_id), &[]
+    ).unwrap();
+    return HttpResponse::Ok().finish();
+}
+
+// #[post("/api/newOrdermaker")]
+pub async fn new_ordermaker(req: web::Json<Ordermaker>) -> impl Responder {
+    let _result_id = DB_CONNECTION.query_edit(
+        &format!(r##"CALL public."insertOrdermaker"({},'{}','{}','{}','{}');"##,req.is_organization,req.contact_name,req.address,req.phone,req.title), &[]
+    ).unwrap();
+    return HttpResponse::Ok().finish();
+}
+
+#[get("/api/getActions")]
+pub async fn get_actions(req: HttpRequest) -> impl Responder {
+    // action id: 9 (fetch journal), level: 2 (admin)
+    check_cookie_rights!{req, 9, 2, {
+        let actions = DB_CONNECTION.query_get_each(&format!(r##"SELECT user_id, description, date from public."getActionsJournalDate"();"##), &[]).unwrap();
+        if actions.is_empty() {
+            return HttpResponse::Ok().body("[]");
+        }
+
+        let mut output = "[".to_owned();
+        let len = actions.len();
+        for (i, row) in actions.into_iter().enumerate() {
+            let id: i64 = row.get(0);
+            let action: String = row.get(1);
+            let date: Option<chrono::NaiveDate> = row.get(2);
+            output += &format!(r##"{{"id":{},"action":"{}","date":"{}"}}"##, id, action,date.as_ref().map(|x| x.to_string()).unwrap_or("null".to_string()));
+            if i != len-1 {
+                output += ",";
+            }
+        }
+        output += "]";
+
+        return HttpResponse::Ok().body(&output);
+    }}
 }
 
 #[get("/api/getAuthors")]
@@ -208,7 +250,7 @@ pub mod cabinet {
 
     #[get("/cabinet")]
     pub async fn get_cabinet_index(req: HttpRequest) -> impl Responder {
-        check_cookie!{ req, {get_content!(GLOBAL_FRONTEND.get_cabinet(), html)} }
+        check_cookie!{ req, {get_content!(GLOBAL_FRONTEND.get_cabinet(), html)}, 1 }
     }
 
     #[get("/cabinet/style.css")]

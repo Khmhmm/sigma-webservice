@@ -51,8 +51,11 @@ async fn main() -> std::io::Result<()> {
             .service(api::signup).service(api::login)
             .service(api::cabinet::get_cabinet_index).service(api::cabinet::get_cabinet_style).service(api::cabinet::get_cabinet_script)
             .service(api::get_active_orders).service(api::have_rights)
-            .service(construct_post_resource!("/api/newTypography", new_typography))
-            .service(construct_post_resource!("/api/newOrder", new_order))
+            .service(construct_post_onlyrights!("/api/newOrder", new_order, 2))
+            .service(construct_post_onlyrights!("/api/newTypography", new_typography, 3))
+            .service(construct_post_onlyrights!("/api/newAuthor", new_author, 4))
+            .service(construct_post_onlyrights!("/api/newOrdermaker", new_ordermaker, 5))
+            .service(api::get_actions)
             .service(api::get_authors).service(api::get_categories).service(api::get_types).service(api::get_typographies).service(api::get_ordermakers)
     })
     .bind_openssl("127.0.0.1:8080", builder)?

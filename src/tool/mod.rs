@@ -5,13 +5,17 @@ use crate::data::DBConnection;
 
 #[macro_export]
 macro_rules! check_cookie{
-    {$req: ident, $if_valid: block} => {{
+    {$req: ident, $if_valid: block, $action_id: expr} => {
         let cookie = $req.headers().get("Cookie");
 
         if let Some(cookie) = cookie.as_ref().and_then(|cookie| cookie.to_str().map_or(None, |s| Some(s))) {
             let hash = &cookie[cookie.find('=').unwrap()+1..];
             let q = r##"SELECT public."validHash"('"##.to_owned() + hash + r##"');"##;
             let is_valid: bool = DB_CONNECTION.query_get(&q, &[]).unwrap().get(0);
+            // TODO: make dynamic
+            if $action_id != 8 {
+                let _ = DB_CONNECTION.query_edit(&format!(r##"CALL public."insertActionByHash"('{}',{}) "##,hash,$action_id), &[]).unwrap();
+            }
             if is_valid {
                 $if_valid
             } else {
@@ -20,15 +24,20 @@ macro_rules! check_cookie{
         } else {
             return HttpResponse::Forbidden().finish();
         }
+    };
+
+    {$req: ident, $if_valid: block} => {{
+        check_cookie!{$req, $if_valid, 7}
     }};
 
-    ($req: ident) => {{
+    ($req: ident, $action_id: expr) => {{
         let cookie = $req.headers().get("Cookie");
 
         if let Some(cookie) = cookie.as_ref().and_then(|cookie| cookie.to_str().map_or(None, |s| Some(s))) {
             let hash = &cookie[cookie.find('=').unwrap()+1..];
             let q = r##"SELECT public."validHash"('"##.to_owned() + hash + r##"');"##;
             let is_valid: bool = DB_CONNECTION.query_get(&q, &[]).unwrap().get(0);
+            let _ = DB_CONNECTION.query_edit(&format!(r##"CALL public."insertActionByHash"('{}',{}) "##,hash,$action_id), &[]).unwrap();
             if is_valid {
                 true
             } else {
@@ -42,11 +51,67 @@ macro_rules! check_cookie{
 }
 
 #[macro_export]
+macro_rules! check_cookie_rights {
+    ($req: ident, $action_id: expr) => {{
+        check_cookie_rights!($req, $action_id, 1)
+    }};
+
+    ($req: ident, $action_id: expr, $level: expr) => {{
+        let cookie = $req.headers().get("Cookie");
+
+        if let Some(cookie) = cookie.as_ref().and_then(|cookie| cookie.to_str().map_or(None, |s| Some(s))) {
+            let hash = &cookie[cookie.find('=').unwrap()+1..];
+            let q = r##"SELECT public."getUserRights"('"##.to_owned() + hash + r##"');"##;
+            let is_valid: i16 = DB_CONNECTION.query_get(&q, &[]).unwrap().get(0);
+            let is_valid = is_valid > $level;
+            let _ = DB_CONNECTION.query_edit(&format!(r##"CALL public."insertActionByHash"('{}',{}) "##,hash,$action_id), &[]).unwrap();
+            if is_valid {
+                true
+            } else {
+                false
+            }
+        } else {
+            false
+        }
+    }};
+
+    {$req: ident, $action_id: expr, $level: expr, $if_valid: block} => {{
+        let cookie = $req.headers().get("Cookie");
+
+        if let Some(cookie) = cookie.as_ref().and_then(|cookie| cookie.to_str().map_or(None, |s| Some(s))) {
+            let hash = &cookie[cookie.find('=').unwrap()+1..];
+            let q = r##"SELECT public."getUserRights"('"##.to_owned() + hash + r##"');"##;
+            let is_valid: i16 = DB_CONNECTION.query_get(&q, &[]).unwrap().get(0);
+            let is_valid = is_valid > $level;
+            let _ = DB_CONNECTION.query_edit(&format!(r##"CALL public."insertActionByHash"('{}',{}) "##,hash,$action_id), &[]).unwrap();
+            if is_valid {
+                $if_valid
+            } else {
+                return HttpResponse::Forbidden().finish();
+            }
+        } else {
+            return HttpResponse::Forbidden().finish();
+        }
+    }};
+}
+
+#[macro_export]
 macro_rules! construct_post_resource{
-    ($route: expr, $api: ident) => {
+    ($route: expr, $api: ident, $action_id: expr) => {
         web::resource($route).route(
                 web::route().guard(actix_web::guard::fn_guard(|req| {
-                    req.method == actix_web::http::Method::POST && check_cookie!(req)
+                    req.method == actix_web::http::Method::POST && check_cookie!(req, $action_id)
+                })).to($api)
+        )
+    }
+}
+
+#[macro_export]
+macro_rules! construct_post_onlyrights{
+    ($route: expr, $api: ident, $action_id: expr) => {
+        web::resource($route).route(
+                web::route().guard(actix_web::guard::fn_guard(|req| {
+                    req.method == actix_web::http::Method::POST && check_cookie_rights!(req, $action_id)
                 })).to($api)
         )
     }
@@ -102,6 +167,6 @@ pub fn construct_query_nameonly(req: web::HttpRequest, q: &str) -> impl Responde
 
             let json = serde_json::to_string(&output).unwrap();
             return HttpResponse::Ok().body(&json);
-        }
+        }, 8
     }
 }
