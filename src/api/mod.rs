@@ -69,6 +69,13 @@ pub async fn signup(req: web::Json<self::login_page::Credentials>) -> impl Respo
     HttpResponse::Ok().body(&password_hash)
 }
 
+#[get("/api/autologin")]
+pub async fn autologin(req: HttpRequest) -> impl Responder {
+    check_cookie!{req, {
+        return HttpResponse::Ok().finish()
+    }, 1}
+}
+
 #[get("/api/activeOrders")]
 pub async fn get_active_orders(req: HttpRequest) -> impl Responder {
     check_cookie!(req, {

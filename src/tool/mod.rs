@@ -10,16 +10,20 @@ macro_rules! check_cookie{
 
         if let Some(cookie) = cookie.as_ref().and_then(|cookie| cookie.to_str().map_or(None, |s| Some(s))) {
             let hash = &cookie[cookie.find('=').unwrap()+1..];
-            let q = r##"SELECT public."validHash"('"##.to_owned() + hash + r##"');"##;
-            let is_valid: bool = DB_CONNECTION.query_get(&q, &[]).unwrap().get(0);
-            // TODO: make dynamic
-            if $action_id != 8 {
-                let _ = DB_CONNECTION.query_edit(&format!(r##"CALL public."insertActionByHash"('{}',{}) "##,hash,$action_id), &[]).unwrap();
-            }
-            if is_valid {
-                $if_valid
+            if hash == "null" {
+                return HttpResponse::NoContent().finish();
             } else {
-                return HttpResponse::Forbidden().finish();
+                let q = r##"SELECT public."validHash"('"##.to_owned() + hash + r##"');"##;
+                let is_valid: bool = DB_CONNECTION.query_get(&q, &[]).unwrap().get(0);
+                // TODO: make dynamic
+                if $action_id != 8 {
+                    let _ = DB_CONNECTION.query_edit(&format!(r##"CALL public."insertActionByHash"('{}',{}) "##,hash,$action_id), &[]).unwrap();
+                }
+                if is_valid {
+                    $if_valid
+                } else {
+                    return HttpResponse::Forbidden().finish();
+                }
             }
         } else {
             return HttpResponse::Forbidden().finish();
@@ -35,6 +39,9 @@ macro_rules! check_cookie{
 
         if let Some(cookie) = cookie.as_ref().and_then(|cookie| cookie.to_str().map_or(None, |s| Some(s))) {
             let hash = &cookie[cookie.find('=').unwrap()+1..];
+            if hash == "null" {
+                return HttpResponse::NoContent().finish();
+            }
             let q = r##"SELECT public."validHash"('"##.to_owned() + hash + r##"');"##;
             let is_valid: bool = DB_CONNECTION.query_get(&q, &[]).unwrap().get(0);
             let _ = DB_CONNECTION.query_edit(&format!(r##"CALL public."insertActionByHash"('{}',{}) "##,hash,$action_id), &[]).unwrap();
@@ -61,14 +68,18 @@ macro_rules! check_cookie_rights {
 
         if let Some(cookie) = cookie.as_ref().and_then(|cookie| cookie.to_str().map_or(None, |s| Some(s))) {
             let hash = &cookie[cookie.find('=').unwrap()+1..];
-            let q = r##"SELECT public."getUserRights"('"##.to_owned() + hash + r##"');"##;
-            let is_valid: i16 = DB_CONNECTION.query_get(&q, &[]).unwrap().get(0);
-            let is_valid = is_valid > $level;
-            let _ = DB_CONNECTION.query_edit(&format!(r##"CALL public."insertActionByHash"('{}',{}) "##,hash,$action_id), &[]).unwrap();
-            if is_valid {
-                true
-            } else {
+            if hash == "null" {
                 false
+            } else {
+                let q = r##"SELECT public."getUserRights"('"##.to_owned() + hash + r##"');"##;
+                let is_valid: i16 = DB_CONNECTION.query_get(&q, &[]).unwrap().get(0);
+                let is_valid = is_valid > $level;
+                let _ = DB_CONNECTION.query_edit(&format!(r##"CALL public."insertActionByHash"('{}',{}) "##,hash,$action_id), &[]).unwrap();
+                if is_valid {
+                    true
+                } else {
+                    false
+                }
             }
         } else {
             false
@@ -80,6 +91,9 @@ macro_rules! check_cookie_rights {
 
         if let Some(cookie) = cookie.as_ref().and_then(|cookie| cookie.to_str().map_or(None, |s| Some(s))) {
             let hash = &cookie[cookie.find('=').unwrap()+1..];
+            if hash == "null" {
+                return HttpResponse::NoContent().finish();
+            }
             let q = r##"SELECT public."getUserRights"('"##.to_owned() + hash + r##"');"##;
             let is_valid: i16 = DB_CONNECTION.query_get(&q, &[]).unwrap().get(0);
             let is_valid = is_valid > $level;

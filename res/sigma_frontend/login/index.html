@@ -7,6 +7,18 @@
         <meta charset="utf-8" />
     </head>
     <body>
+        <!-- autologin attempt -->
+        <script type="text/javascript">
+            let xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                    window.location = '/cabinet';
+                }
+            }
+            xhr.open('GET', '/api/autologin', true);
+            xhr.send();
+        </script>
+
         <div class="hat">
             <p> Σигма </p>
         </div>
@@ -23,6 +35,7 @@
         <button class="b2" type="button" id="signup">Я тут впервые</button>
         <p class="warn" id="warn"> </p>
 
+        <!-- force autologining stored in script -->
         <script src="/login/script.js"> </script>
     </body>
 </html>

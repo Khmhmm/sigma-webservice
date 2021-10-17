@@ -48,7 +48,7 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .service(api::index::get_index).service(api::index::get_index_css).service(api::index::get_index_js)
             .service(api::login_page::get_login).service(api::login_page::get_login_style).service(api::login_page::get_login_script)
-            .service(api::signup).service(api::login)
+            .service(api::signup).service(api::login).service(api::autologin)
             .service(api::cabinet::get_cabinet_index).service(api::cabinet::get_cabinet_style).service(api::cabinet::get_cabinet_script)
             .service(api::get_active_orders).service(api::have_rights)
             .service(construct_post_onlyrights!("/api/newOrder", new_order, 2))
