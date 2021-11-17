@@ -109,6 +109,8 @@ pub async fn have_rights(req: HttpRequest) -> impl Responder {
 
 // #[post("/api/newTypography")]
 pub async fn new_typography(req: web::Json<Typography>) -> impl Responder {
+    let mut req = req.clone();
+    req.escape();
     let _result_id = DB_CONNECTION.query_edit(
         &format!(r##"CALL public."insertTypography"('{}','{}','{}');"##,req.name,req.address,req.phone), &[]
     ).unwrap();
@@ -117,6 +119,8 @@ pub async fn new_typography(req: web::Json<Typography>) -> impl Responder {
 
 // #[post("/api/newOrder]
 pub async fn new_order(req: web::Json<Order>) -> impl Responder {
+    let mut req = req.clone();
+    req.escape();
     let _result_id = DB_CONNECTION.query_edit(
         &format!(r##"CALL public."insertOrder"('{}','{}','{}','{}','{}','{}','{}','{}');"##,req.author_id,req.name,req.category_id,req.year,req.type_id,req.typography_id,req.ordermaker_id,req.price), &[]
     ).unwrap();
@@ -125,6 +129,9 @@ pub async fn new_order(req: web::Json<Order>) -> impl Responder {
 
 // #[post("/api/newAuthor")]
 pub async fn new_author(req: web::Json<Author>) -> impl Responder {
+    let mut req = req.clone();
+    println!("{:?}", req);
+    req.escape();
     let _result_id = DB_CONNECTION.query_edit(
         &format!(r##"CALL public."insertAuthor"('{}','{}','{}');"##,req.name,req.birthday,req.zodiac_id), &[]
     ).unwrap();
@@ -133,6 +140,8 @@ pub async fn new_author(req: web::Json<Author>) -> impl Responder {
 
 // #[post("/api/newOrdermaker")]
 pub async fn new_ordermaker(req: web::Json<Ordermaker>) -> impl Responder {
+    let mut req = req.clone();
+    req.escape();
     let _result_id = DB_CONNECTION.query_edit(
         &format!(r##"CALL public."insertOrdermaker"({},'{}','{}','{}','{}');"##,req.is_organization,req.contact_name,req.address,req.phone,req.title), &[]
     ).unwrap();

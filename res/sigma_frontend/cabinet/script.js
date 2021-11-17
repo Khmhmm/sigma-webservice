@@ -520,7 +520,6 @@ accountButton.onclick = async function() {
     journal.style.display = 'none';
     logoutButton.style.display="flow-root";
     let x = await haveRights;
-    whoami.innerHTML = "<p>Мой уровень прав: " + x+`</p>
-    <p>Куки: <span class="covered">`+document.cookie+`</span></p>`;
+    whoami.innerHTML = "<p>Мой уровень прав: " + x+`</p>`;
     whoami.style.display="flow-root";
 }

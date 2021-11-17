@@ -17,3 +17,4 @@ serde_json = "^1"
 postgres = {version="^0.19", features = ["with-chrono-0_4"]}
 chrono = "^0.4"
 scrypt = "0.8.0"
+html-escape = "^0.2"
