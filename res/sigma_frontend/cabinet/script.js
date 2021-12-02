@@ -10,7 +10,6 @@ hat.onclick = function() {
         <!-- Не забыть вынести в js!! -->
         <button type="button" class="menuButton" id="addButton">Добавить</button>
         <button type="button" class="menuButton" id="viewButton">Просмотр</button>
-        <button type="button" class="menuButton" id="editButton">Изменить</button>
         <button type="button" class="menuButton" id="accountButton">Аккаунт</button>
 </div>
 
@@ -56,7 +55,6 @@ ordermakerForm.id = "ordermakerForm";
 
 let addButton = document.querySelector('#addButton');
 let viewButton = document.querySelector('#viewButton');
-let editButton = document.querySelector('#editButton');
 let accountButton = document.querySelector('#accountButton');
 let sortMenu = document.querySelector('#sort-menu');
 
@@ -130,7 +128,7 @@ let lockOnRights = function f() {
     }, 100));
 };
 
-const new_typography_onclick = function() {
+function typography_onclick(method) {
     let xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
@@ -141,10 +139,18 @@ const new_typography_onclick = function() {
             pushNotification("Произошла ошибка. Ответ сервера:" + this.status, "D17373");
         }
     }
-    xhr.open("POST","/api/newTypography");
+    xhr.open("POST", method);
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.send(JSON.stringify({'name':document.getElementById('formName').value,'address':document.getElementById('formAddress').value,'phone':document.getElementById('formPhone').value}));
+}
+
+const new_typography_onclick = function() {
+    typography_onclick("/api/newTypography");
 };
+
+const edit_typography_onclick = function() {
+    typography_onclick("/api/editTypography");
+}
 
 const new_order_onclick = function() {
     let xhr = new XMLHttpRequest();
@@ -173,7 +179,7 @@ const new_order_onclick = function() {
     ));
 };
 
-const new_author_onclick = function() {
+function author_onclick(method) {
     let xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
@@ -185,7 +191,7 @@ const new_author_onclick = function() {
         }
     }
 
-    xhr.open("POST","/api/newAuthor");
+    xhr.open("POST", method);
     xhr.setRequestHeader('Content-Type', 'application/json');
 
     xhr.send(JSON.stringify(
@@ -195,9 +201,17 @@ const new_author_onclick = function() {
             'zodiac_id': document.querySelector('#authorForm > div > input.formZodiac').value
         }
     ));
+}
+
+const new_author_onclick = function() {
+    author_onclick("/api/newAuthor");
 };
 
-const new_ordermaker_onclick = function(){
+const edit_author_onclick = function() {
+    author_onclick("/api/editAuthor");
+};
+
+function ordermaker_onclick(method) {
     let xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
@@ -209,7 +223,7 @@ const new_ordermaker_onclick = function(){
         }
     }
 
-    xhr.open("POST","/api/newOrdermaker");
+    xhr.open("POST", method);
     xhr.setRequestHeader('Content-Type', 'application/json');
 
     let is_organization = document.querySelector('#ordermakerForm > div > input.formIsOrganization').value;
@@ -225,6 +239,14 @@ const new_ordermaker_onclick = function(){
     ));
 }
 
+const new_ordermaker_onclick = function(){
+    ordermaker_onclick("/api/newOrdermaker");
+}
+
+const edit_ordermaker_onclick = function(){
+    ordermaker_onclick("/api/editOrdermaker");
+}
+
 let xhr_have_rights = new XMLHttpRequest();
 xhr_have_rights.onreadystatechange = async function() {
     if (this.readyState == 4 && this.status == 200) {
@@ -234,7 +256,6 @@ xhr_have_rights.onreadystatechange = async function() {
             addMenuButton.disabled = false;
         } else {
             addButton.disabled = true;
-            editButton.disabled = true;
             viewButton.disabled = true;
         }
         rightsResult = json;
@@ -289,12 +310,12 @@ async function init_forms() {
             await xhr.onreadystatechange();
         }
 
-        function newButton(fn_onclick) {
+        function newButton(fn_onclick, text) {
             // template for further buttons
             let newButton = document.createElement("button");
             newButton.classList.add("menuButton");
             newButton.classList.add("formButton");
-            newButton.innerText="Отправить";
+            newButton.innerText = text;
             newButton.onclick = fn_onclick;
             return newButton;
         }
@@ -352,15 +373,23 @@ async function init_forms() {
         getData(xhr_ordermakers, "/api/getOrdermakers", "Заказчик", "formOrdermaker");
 
 
-        const newTypographyButton = newButton(new_typography_onclick);
-        const newOrderButton = newButton(new_order_onclick);
-        const newAuthorButton = newButton(new_author_onclick);
-        const newOrdermakerButton = newButton(new_ordermaker_onclick);
+        const newTypographyButton = newButton(new_typography_onclick, 'Создать');
+        const newOrderButton = newButton(new_order_onclick, 'Создать');
+        const newAuthorButton = newButton(new_author_onclick, 'Создать');
+        const newOrdermakerButton = newButton(new_ordermaker_onclick, 'Создать');
 
         typoForm.appendChild(newTypographyButton);
         orderForm.appendChild(newOrderButton);
         authorForm.appendChild(newAuthorButton);
         ordermakerForm.appendChild(newOrdermakerButton);
+
+        const editTypographyButton = newButton(edit_typography_onclick, 'Изменить данные для этого имени');
+        const editAuthorButton = newButton(edit_author_onclick, 'Изменить данные для этого имени');
+        const editOrdermakerButton = newButton(edit_ordermaker_onclick, 'Изменить данные для этого имени');
+
+        typoForm.appendChild(editTypographyButton);
+        authorForm.appendChild(editAuthorButton);
+        ordermakerForm.appendChild(editOrdermakerButton);
     }
 }
 let _promise = init_forms();
@@ -427,7 +456,7 @@ undermenu.appendChild(newAuthorButton);
 undermenu.appendChild(newOrdermakerButton);
 
 addButton.onclick = async function() {
-    addButton.innerText = "Добавить >";
+    addButton.innerText = "Добавить/Изменить >";
 
     let x = await haveRights;
 
@@ -439,7 +468,6 @@ addButton.onclick = async function() {
         pushNotification("У вас нет прав на просмотр этой страницы", "D17373");
     }
     viewButton.innerText = "Просмотр";
-    editButton.innerText = "Изменить";
     journal.style.display = 'none';
     logoutButton.style.display="none";
     whoami.style.display="none";
@@ -449,12 +477,11 @@ viewButton.onclick = async function() {
     logoutButton.style.display="none";
     whoami.style.display="none";
     form.style.display = "none";
-    addButton.innerText = "Добавить";
+    addButton.innerText = "Добавить/Изменить";
     newTypographyButton.style.display="none";
     newAuthorButton.style.display="none";
     newOrdermakerButton.style.display="none";
     viewButton.innerText = "Просмотр >";
-    editButton.innerText = "Изменить";
 
     if (journal.childNodes.length > 0) {
         journal.style.display = "flow-root";
@@ -467,8 +494,6 @@ viewButton.onclick = async function() {
         let xhr = new XMLHttpRequest();
         xhr.onreadystatechange = function() {
             if (xhr.readyState==4 && xhr.status==200) {
-                console.log(this.responseText);
-                collection = JSON.parse(this.responseText);
                 let new_li = document.createElement('ul');
                 new_li.className = 'activeOrders';
                 for(let i=0; i<collection.length; i++) {
@@ -490,18 +515,6 @@ viewButton.onclick = async function() {
     }
 }
 
-editButton.onclick = function() {
-    form.style.display = "none";
-    addButton.innerText = "Добавить";
-    newTypographyButton.style.display="none";
-    newAuthorButton.style.display="none";
-    newOrdermakerButton.style.display="none";
-    viewButton.innerText = "Просмотр";
-    editButton.innerText = "Изменить >";
-    journal.style.display = 'none';
-    logoutButton.style.display="none";
-    whoami.style.display="none";
-}
 
 let whoami = document.createElement("div");
 whoami.className = "nav-add";
@@ -519,12 +532,11 @@ undermenu.appendChild(logoutButton);
 
 accountButton.onclick = async function() {
     form.style.display = "none";
-    addButton.innerText = "Добавить";
+    addButton.innerText = "Добавить/Изменить";
     newTypographyButton.style.display="none";
     newAuthorButton.style.display="none";
     newOrdermakerButton.style.display="none";
     viewButton.innerText = "Просмотр";
-    editButton.innerText = "Изменить";
     journal.style.display = 'none';
     logoutButton.style.display="flow-root";
     let x = await haveRights;
@@ -570,6 +582,3 @@ function updateOrders(orders) {
 }
 
 sortButton.onclick = () => { updateOrders(ordersList); };
-
-
-// 

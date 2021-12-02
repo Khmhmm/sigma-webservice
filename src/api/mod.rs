@@ -117,6 +117,18 @@ pub async fn new_typography(req: web::Json<Typography>) -> impl Responder {
     return HttpResponse::Ok().finish();
 }
 
+// #[post("/api/editTypography")]
+pub async fn edit_typography(req: web::Json<Typography>) -> impl Responder {
+    let mut req = req.clone();
+    req.escape();
+    println!("{:?}", req);
+    let _result_id = DB_CONNECTION.query_edit(
+        &format!(r##"UPDATE public."Typography" SET address='{}', phone='{}' WHERE name='{}'; "##, req.address, req.phone, req.name), &[]
+    ).unwrap();
+
+    return HttpResponse::Ok().finish();
+}
+
 // #[post("/api/newOrder]
 pub async fn new_order(req: web::Json<Order>) -> impl Responder {
     let mut req = req.clone();
@@ -146,6 +158,17 @@ pub async fn new_author(req: web::Json<Author>) -> impl Responder {
     return HttpResponse::Ok().finish();
 }
 
+// #[post("/api/editAuthor")]
+pub async fn edit_author(req: web::Json<Author>) -> impl Responder {
+    let mut req = req.clone();
+    req.escape();
+    let _result_id = DB_CONNECTION.query_edit(
+        &format!(r##"UPDATE public."Authors" SET birthday='{}' WHERE name='{}'; "##, req.birthday, req.name), &[]
+    ).unwrap();
+
+    return HttpResponse::Ok().finish();
+}
+
 // #[post("/api/newOrdermaker")]
 pub async fn new_ordermaker(req: web::Json<Ordermaker>) -> impl Responder {
     let mut req = req.clone();
@@ -153,6 +176,20 @@ pub async fn new_ordermaker(req: web::Json<Ordermaker>) -> impl Responder {
     let _result_id = DB_CONNECTION.query_edit(
         &format!(r##"CALL public."insertOrdermaker"({},'{}','{}','{}','{}');"##,req.is_organization,req.contact_name,req.address,req.phone,req.title), &[]
     ).unwrap();
+    return HttpResponse::Ok().finish();
+}
+
+// #[post("/api/editOrdermaker")]
+pub async fn edit_ordermaker(req: web::Json<Ordermaker>) -> impl Responder {
+    let mut req = req.clone();
+    req.escape();
+    let _result_id = DB_CONNECTION.query_edit(
+        &format!(
+            r##"UPDATE public."OrderMakers" SET is_organization={}, contact_name='{}', address='{}', phone='{}' WHERE title='{}';"##,
+            req.is_organization, req.contact_name, req.address, req.phone, req.title
+        ), &[]
+    ).unwrap();
+
     return HttpResponse::Ok().finish();
 }
 
