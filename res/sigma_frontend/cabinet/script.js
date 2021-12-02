@@ -58,6 +58,7 @@ let addButton = document.querySelector('#addButton');
 let viewButton = document.querySelector('#viewButton');
 let editButton = document.querySelector('#editButton');
 let accountButton = document.querySelector('#accountButton');
+let sortMenu = document.querySelector('#sort-menu');
 
 let undermenu = document.querySelector("#undermenu");
 undermenu.style.display = "none";
@@ -85,9 +86,11 @@ xhr_active_orders.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
        loadingStatus.innerText = "Список загружен";
        const json = JSON.parse(xhr_active_orders.responseText);
+       let cnt = 0;
        const _promise = Promise.all(json.map(async (el) => {
            let new_li = document.createElement('li');
            new_li.classList.add('activeOrder');
+           new_li.classList.add('inlinedLi');
            let orderStatus = 'Создано';
            if (el['status'] == 2) {
                orderStatus = 'Обрабатывается';
@@ -95,9 +98,11 @@ xhr_active_orders.onreadystatechange = function() {
                orderStatus = 'Готово';
            }
 
-           new_li.innerHTML = '<p class="orderInfo"> Заказ<span class="orderInfo">' + el['author'] + '"' + el['ord'] + '"' + '</span></p>'
-            + '<p class="orderInfo">Заказчик: ' + el['ordermaker'] + '<span class="orderInfo">Типография: ' + el['typography'] + '</span></p>'
-            + '<p class="orderInfo">Тип: ' + el['ty'] + '<span class="orderInfo">Статус: ' + orderStatus + '</span></p>';
+           new_li.innerHTML = '<p class="orderInfo"> Заказ: <span class="orderInfo orderName">' + el['author'] + '"' + el['ord'] + '"' + '</span></p>'
+            + '<p class="orderInfo">Заказчик: <span class="orderInfo orderMaker">' + el['ordermaker'] + '</span></p>'
+            + '<p class="orderInfo">Типография: <span class="orderInfo orderTypography">' + el['typography'] + '</span></p>'
+            + '<p class="orderInfo">Тип: <span class="orderInfo orderType">' + el['ty'] + '</span></p>'
+            + '<p class="orderInfo">Статус: <span class="orderInfo">' + orderStatus + '</span></p>';
 
             ordersList.appendChild(new_li);
        }));
@@ -249,12 +254,14 @@ listMenuButton.onclick = () => {
     ordersList.style.display="flow-root";
     undermenu.style.display="none";
     journal.style.display = 'none';
+    sortMenu.style.display="flow-root";
 }
 
 handleMenuButton.onclick = () => {
     form.style.display="none";
     ordersList.style.display="none";
     undermenu.style.display="flow-root";
+    sortMenu.style.display="none";
 }
 
 async function init_forms() {
@@ -370,6 +377,7 @@ addMenuButton.onclick = async function() {
         ordersList.style.display="none";
         undermenu.style.display="none";
         journal.style.display = 'none';
+        sortMenu.style.display = 'none';
     }
 }
 
@@ -523,3 +531,45 @@ accountButton.onclick = async function() {
     whoami.innerHTML = "<p>Мой уровень прав: " + x+`</p>`;
     whoami.style.display="flow-root";
 }
+
+
+// sorting
+
+sortAuthors = document.getElementById('sort-author');
+sortOrdermaker = document.getElementById('sort-ordermaker');
+sortTypography = document.getElementById('sort-typography');
+sortType = document.getElementById('sort-type');
+sortName = document.getElementById('sort-name');
+sortButton = document.getElementById('sort-button');
+
+function updateOrders(orders) {
+    for(i = 3; i < orders.childNodes.length; i++) {
+        order = orders.childNodes[i];
+        console.log(order);
+        author_and_name = order.querySelector('.orderName').innerText.split('"');
+        author = author_and_name[0];
+        name = author_and_name[1];
+        ordermaker = order.querySelector('.orderMaker').innerText;
+        ordertypography = order.querySelector('.orderTypography').innerText;
+        ordertype = order.querySelector('.orderType').innerText;
+        console.log(ordermaker + ordertypography + ordertype)
+        if (sortAuthors.value != '' && author != sortAuthors.value) {
+            order.style.display = 'none';
+        } else if (sortOrdermaker.value != '' && ordermaker != sortOrdermaker.value) {
+            order.style.display = 'none';
+        } else if (sortTypography.value != '' && ordertypography != sortTypography.value) {
+            order.style.display = 'none';
+        } else if (sortType.value != '' && ordertype != sortType.value) {
+            order.style.display = 'none';
+        } else if (sortName.value != '' && name != sortName.value) {
+            order.style.display = 'none';
+        } else {
+            order.style.display = 'inline-table';
+        }
+    }
+}
+
+sortButton.onclick = () => { updateOrders(ordersList); };
+
+
+// 

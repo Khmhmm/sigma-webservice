@@ -81,12 +81,18 @@ ul.ordersList {}
     margin-bottom: 5px;
 }
 
+.inlinedLi {
+    display: inline-table;
+    border-right: 12px solid white;
+}
+
 .orderInfo {
     font-size: 16px;
+    margin-bottom: -4px;
 }
 
 span.orderInfo {
-    float: right;
+    /* float: right; */
 }
 
 button:disabled,

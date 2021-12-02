@@ -1,7 +1,7 @@
-<!<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
     <head>
-        <title> Login </title>
+        <title> Cabinet </title>
         <!-- <link rel="stylesheet" href="/cabinet/style.css"> -->
         <link rel="stylesheet" href="/cabinet/style.css">
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
@@ -21,8 +21,18 @@
         <div class="undermenu" id="undermenu">
                 <button type="button" class="menuButton" id="addButton">Добавить</button>
                 <button type="button" class="menuButton" id="viewButton">Просмотр</button>
-                <button type="button" class="menuButton" id="editButton" disabled>Изменить</button>
+                <button type="button" class="menuButton" id="editButton">Изменить</button>
                 <button type="button" class="menuButton" id="accountButton">Аккаунт</button>
+        </div>
+
+        <div id="sort-menu">
+            <span> Выбрать </span>
+            <span> по авторам <input id = "sort-author"></input></span>
+            <span> по заказчикам <input id = "sort-ordermaker"></input></span>
+            <span> по типографии <input id = "sort-typography"></input></span>
+            <span> по типу <input id = "sort-type"></input></span>
+            <span> по названию <input id = "sort-name"></input></span>
+            <button class="menuButton" id = "sort-button"> Поиск </button>
         </div>
 
         <ul class="ordersList" id="activeOrders">

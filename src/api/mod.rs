@@ -121,8 +121,16 @@ pub async fn new_typography(req: web::Json<Typography>) -> impl Responder {
 pub async fn new_order(req: web::Json<Order>) -> impl Responder {
     let mut req = req.clone();
     req.escape();
+
+    if req.price < 0. || req.year < 0 {
+        return HttpResponse::BadRequest().finish();
+    }
+
     let _result_id = DB_CONNECTION.query_edit(
-        &format!(r##"CALL public."insertOrder"('{}','{}','{}','{}','{}','{}','{}','{}');"##,req.author_id,req.name,req.category_id,req.year,req.type_id,req.typography_id,req.ordermaker_id,req.price), &[]
+        &format!(
+            r##"CALL public."insertOrder"('{}','{}','{}','{}','{}','{}','{}','{}');"##,
+            req.author_id, req.name, req.category_id, req.year, req.type_id, req.typography_id, req.ordermaker_id, req.price
+        ), &[]
     ).unwrap();
     return HttpResponse::Ok().finish();
 }
